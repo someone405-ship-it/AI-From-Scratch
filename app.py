@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-AI From Scratch - Full Featured Mobile App
+AI From Scratch - Full Featured Mobile App (PWA Installable)
 
-Live streaming thinking steps, better web search, conversation memory,
-auto status refresh, export chat, strong modes, local training, X Bot, GitHub.
-
-Tested & bugfixed.
+Live streaming thinking steps, web search, conversation memory,
+continuous training, X Bot, GitHub awareness.
+Installable on phone home screen.
 """
 
 import os
@@ -140,7 +139,6 @@ def save_x_config():
 
 # ===================== ROBUST WEB SEARCH =====================
 def web_search(query, max_results=5):
-    """More robust search with multiple extraction strategies."""
     if not query or not query.strip():
         return "Empty query."
 
@@ -154,10 +152,8 @@ def web_search(query, max_results=5):
         url = f"https://html.duckduckgo.com/html/?q={quote_plus(query.strip())}"
         r = requests.get(url, headers=headers, timeout=12)
         html = r.text
-
         results = []
 
-        # Strategy 1: classic result__ classes
         titles = re.findall(r'class="result__a"[^>]*>(.*?)</a>', html, re.DOTALL | re.IGNORECASE)
         snippets = re.findall(r'class="result__snippet"[^>]*>(.*?)</(?:a|td|div|span)>', html, re.DOTALL | re.IGNORECASE)
 
@@ -176,7 +172,6 @@ def web_search(query, max_results=5):
             if len(results) >= max_results:
                 break
 
-        # Strategy 2: fallback links
         if not results:
             links = re.findall(r'<a[^>]+href="//duckduckgo\.com/l/[^"]+"[^>]*>(.*?)</a>', html, re.DOTALL | re.IGNORECASE)
             for link in links:
@@ -187,28 +182,16 @@ def web_search(query, max_results=5):
                 if len(results) >= max_results:
                     break
 
-        # Strategy 3: any substantial text near results
-        if not results:
-            blocks = re.findall(r'<td[^>]*class="[^"]*result[^"]*"[^>]*>(.*?)</td>', html, re.DOTALL | re.IGNORECASE)
-            for b in blocks:
-                clean = re.sub(r'<[^>]+>', ' ', b)
-                clean = re.sub(r'\s+', ' ', clean).strip()
-                if len(clean) > 40:
-                    results.append(clean[:200])
-                if len(results) >= max_results:
-                    break
-
         if results:
             return "\n\n".join(results)
 
         return (
             "Search returned no clear results.\n"
-            "This can happen with network restrictions or temporary blocks.\n"
             "Try a different query or rely on local knowledge + training."
         )
 
     except requests.Timeout:
-        return "Search timed out. The AI will answer with local knowledge only."
+        return "Search timed out. Using local knowledge only."
     except requests.RequestException as e:
         return f"Search currently unavailable ({type(e).__name__}). Using local knowledge."
     except Exception as e:
@@ -311,12 +294,8 @@ def local_generate(prompt, max_tokens=150, temperature=0.85, top_k=50):
     except Exception as e:
         return f"[Generation error: {e}]"
 
-# ===================== STREAMING CHAT (TESTED) =====================
+# ===================== STREAMING CHAT =====================
 def chat_stream(message, history, mode, temperature, top_k, max_tokens):
-    """
-    Generator that streams thinking steps live, then the final answer.
-    Tested for empty input, missing model, and different modes.
-    """
     history = list(history or [])
 
     if not message or not str(message).strip():
@@ -341,11 +320,9 @@ def chat_stream(message, history, mode, temperature, top_k, max_tokens):
         return temp_history
 
     try:
-        # Always start with planning
         yield update_process("Planning the best way to answer…"), ""
         time.sleep(0.3)
 
-        # Conversation memory
         memory = ""
         if history:
             recent = history[-3:]
@@ -356,14 +333,12 @@ def chat_stream(message, history, mode, temperature, top_k, max_tokens):
                 mem_parts.append(f"AI: {clean_a}")
             memory = "Recent conversation:\n" + "\n".join(mem_parts)
 
-        # Manual knowledge
         knowledge_context = ""
         if manual_knowledge:
             yield update_process(f"Recalling {len(manual_knowledge)} taught facts…"), ""
             time.sleep(0.2)
             knowledge_context = "Known facts:\n" + "\n".join(f"- {k}" for k in manual_knowledge[-12:])
 
-        # Intent detection
         lower = str(message).lower()
         if any(w in lower for w in ["github", "repo", "repository", "push code", "commit", "pull request"]):
             yield update_process("Connecting to GitHub…"), ""
@@ -375,7 +350,6 @@ def chat_stream(message, history, mode, temperature, top_k, max_tokens):
             time.sleep(0.2)
             knowledge_context += f"\n\n[X Bot: enabled={x_bot_config.get('enabled')}, topics={x_bot_config.get('topics', 'none')}]"
 
-        # Web search
         search_results = ""
         if do_search:
             yield update_process(f"Searching the web for “{str(message)[:55]}”…"), ""
@@ -384,12 +358,10 @@ def chat_stream(message, history, mode, temperature, top_k, max_tokens):
             yield update_process("Search finished — analyzing results…"), ""
             time.sleep(0.25)
 
-        # Extra thinking
         for i in range(think_rounds):
             yield update_process(f"Deep thinking round {i+1}/{think_rounds}…"), ""
             time.sleep(0.3 + i * 0.15)
 
-        # Build prompt
         prompt_parts = []
         if memory:
             prompt_parts.append(memory)
@@ -417,7 +389,6 @@ def chat_stream(message, history, mode, temperature, top_k, max_tokens):
                 "4. Use **Research** mode for questions that need current info"
             )
 
-        # Assemble final message
         process_text = "**Thinking process**\n" + "\n".join(f"- {s}" for s in steps_so_far)
         if mode in ("Strong", "Research"):
             final_message = process_text + "\n\n---\n\n" + final_answer
@@ -525,6 +496,24 @@ def clear_chat():
     return [], ""
 
 # ===================== UI =====================
+pwa_head = """
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AI Scratch">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#8b5cf6">
+<link rel="manifest" href="/static/manifest.json">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+  });
+}
+</script>
+"""
+
 custom_css = """
 .gradio-container { max-width: 100% !important; padding: 6px !important; }
 footer { display: none !important; }
@@ -537,6 +526,7 @@ with gr.Blocks(
     title="AI From Scratch",
     theme=gr.themes.Soft(primary_hue="violet", secondary_hue="indigo", neutral_hue="slate"),
     css=custom_css,
+    head=pwa_head,
 ) as demo:
 
     gr.Markdown("""
@@ -544,13 +534,12 @@ with gr.Blocks(
       <h1 style="margin:0;font-size:1.65rem;background:linear-gradient(90deg,#a78bfa,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
         AI From Scratch
       </h1>
-      <p style="margin:2px 0 0;opacity:0.75;font-size:0.88rem;">Live thinking • Web search • Local training • Mobile ready</p>
+      <p style="margin:2px 0 0;opacity:0.75;font-size:0.88rem;">Live thinking • Web search • Install on your phone</p>
     </div>
     """)
 
     with gr.Tabs():
 
-        # ===== CHAT =====
         with gr.Tab("Chat"):
             chatbot = gr.Chatbot(
                 height=440,
@@ -581,22 +570,13 @@ with gr.Blocks(
                     export_btn = gr.Button("Export chat", size="sm")
                 export_box = gr.Textbox(label="Exported conversation", lines=6, visible=False)
 
-            send.click(
-                chat_stream,
-                [msg, chatbot, mode, temperature, top_k, max_tokens],
-                [chatbot, msg]
-            )
-            msg.submit(
-                chat_stream,
-                [msg, chatbot, mode, temperature, top_k, max_tokens],
-                [chatbot, msg]
-            )
+            send.click(chat_stream, [msg, chatbot, mode, temperature, top_k, max_tokens], [chatbot, msg])
+            msg.submit(chat_stream, [msg, chatbot, mode, temperature, top_k, max_tokens], [chatbot, msg])
             clear_btn.click(clear_chat, outputs=[chatbot, msg])
             export_btn.click(export_chat, chatbot, export_box).then(
                 lambda: gr.update(visible=True), None, export_box
             )
 
-        # ===== LEARN =====
         with gr.Tab("Learn"):
             gr.Markdown("### Learn from your device")
             files = gr.File(label="Select files from phone or computer", file_count="multiple",
@@ -615,7 +595,6 @@ with gr.Blocks(
             teach_btn.click(teach_fact, fact_input, [upload_result, knowledge_box])
             clear_k_btn.click(clear_knowledge, outputs=[upload_result, knowledge_box])
 
-        # ===== TRAIN =====
         with gr.Tab("Train"):
             status = gr.Markdown(get_status())
             with gr.Row():
@@ -624,21 +603,19 @@ with gr.Blocks(
                 stop_btn = gr.Button("Stop", variant="stop")
             refresh = gr.Button("Refresh Status", size="sm")
 
-            # Safe auto-refresh (works on Gradio versions that support Timer)
             try:
                 timer = gr.Timer(4)
                 timer.tick(get_status, outputs=status)
             except Exception:
-                pass  # older Gradio — user can still press Refresh
+                pass
 
-            gr.Markdown("Continuous mode keeps improving the model until you press Stop. More data + more time = smarter AI.")
+            gr.Markdown("Continuous mode keeps improving the model until you press Stop.")
 
             start_btn.click(start_train, gr.State(False), [status, status])
             cont_btn.click(start_train, gr.State(True), [status, status])
             stop_btn.click(stop_train, outputs=[status, status])
             refresh.click(get_status, outputs=status)
 
-        # ===== X BOT =====
         with gr.Tab("X Bot"):
             gr.Markdown("### Automatic X (Twitter) Poster")
             x_enabled = gr.Checkbox(label="Enable X Bot", value=False)
@@ -661,7 +638,6 @@ with gr.Blocks(
                          x_status)
             gen_btn.click(generate_x_post, x_topics, sample_post)
 
-        # ===== GITHUB =====
         with gr.Tab("GitHub"):
             gr.Markdown("""
             ### GitHub Integration
@@ -672,30 +648,21 @@ with gr.Blocks(
             In Chat you can ask about the repository. When the AI detects GitHub-related questions it shows “Connecting to GitHub…” in the thinking process.
             """)
 
-        # ===== ABOUT =====
         with gr.Tab("About"):
             gr.Markdown("""
             ### AI From Scratch
 
-            A real neural network you train yourself, with modern agent-style features.
+            A real neural network you train yourself.
+
+            **Install on your phone**
+            1. Open this page on your phone
+            2. Android → menu → Add to Home screen / Install app
+            3. iPhone → Share → Add to Home Screen
 
             **Thinking Modes**
-            - **Fast** — quick local answer
-            - **Balanced** — normal reasoning + memory
-            - **Strong** — live thinking steps + knowledge + search
-            - **Research** — deepest mode, multiple rounds, best search
+            - Fast / Balanced / Strong / Research
 
-            **Key features**
-            - Live streaming of every thinking step
-            - Web search (no API key needed)
-            - Conversation memory
-            - Learn from device files + manual teaching
-            - Continuous training
-            - X Bot configuration
-            - Export chat history
-            - Mobile-first UI
-
-            The more high-quality data you give it and the longer you train, the better it becomes.
+            The more data you give it and the longer you train, the better it becomes.
             """)
 
     demo.load(load_or_create_model, outputs=None)
@@ -705,5 +672,10 @@ with gr.Blocks(
 
 if __name__ == "__main__":
     print(f"\nAI From Scratch starting on {device}")
-    print("Open http://localhost:7860 (or your computer IP) on phone or desktop\n")
-    demo.launch(server_name="0.0.0.0", server_port=7860, share=False)
+    print("Open the address below on your phone, then Install / Add to Home Screen\n")
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        share=False,
+        favicon_path=None,
+    )
