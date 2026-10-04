@@ -1,28 +1,25 @@
 # AI From Scratch
 
-**Your own neural network** — trained by you, running on your device, with a beautiful mobile-first interface.
-
-No external LLM APIs for the core brain. Pure PyTorch Transformer built from the ground up.
+Your own neural network — trained by you, running on your device, with live thinking, web search, and a beautiful mobile interface.
 
 ---
 
-## Features
+## Highlights
 
-| Feature | Description |
-|---------|-------------|
-| **Mobile-first UI** | Excellent interface designed for phones |
-| **Chat** | Talk to the model you trained |
-| **Learn from device** | Upload files directly from your phone/computer |
-| **Manual teaching** | Teach specific facts that the AI remembers |
-| **Continuous training** | Keeps learning until you stop it |
-| **Stronger model** | 384-dim, 8 layers, 8 heads, 512 context |
-| **X Bot section** | Configure automatic posting 2–3 times per day |
-| **GitHub section** | Works with your connected GitHub |
-| **Top-k sampling** | Higher quality generation |
+- **Live streaming thinking steps** — watch the AI plan, search, recall facts, and generate in real time
+- **Four thinking modes**: Fast → Balanced → Strong → Research
+- **Web search** (no API key required)
+- **Conversation memory**
+- **Learn from device files** + manual teaching
+- **Continuous training** with auto checkpoints
+- **X Bot** configuration section
+- **GitHub** awareness
+- **Export chat**
+- **Mobile-first** excellent UI
 
 ---
 
-## Quick Start (Mobile or Desktop)
+## Quick Start
 
 ```bash
 git clone https://github.com/someone405-ship-it/AI-From-Scratch.git
@@ -31,69 +28,64 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Then open **http://YOUR-IP:7860** on your phone (or localhost:7860 on computer).
-
-You can also install it as a Progressive Web App on mobile for an app-like experience.
+Open **http://localhost:7860** (or your computer’s IP on your phone).
 
 ---
 
-## How to use
+## Thinking Modes
 
-1. Go to **Learn** tab → upload text files from your device
-2. Go to **Train** tab → press **Continuous Mode**
-3. Let it train (the longer the better)
-4. Go to **Chat** and talk to your AI
-5. Optionally configure the **X Bot** and **GitHub** sections
+| Mode | What it does |
+|------|--------------|
+| **Fast** | Quick local answer |
+| **Balanced** | Memory + light reasoning |
+| **Strong** | Live steps + knowledge + web search |
+| **Research** | Deepest reasoning, multiple rounds, best search |
 
----
-
-## X Bot
-
-In the X Bot tab you can:
-- Set topics
-- Choose how many posts per day (1–5)
-- Enter your X API keys
-- Generate sample posts with your trained model
-
-Real automatic posting requires valid X API credentials (developer.x.com).
+In Strong and Research modes you will see every step appear live:
+- Planning…
+- Recalling facts…
+- Connecting to GitHub…
+- Searching the web…
+- Deep thinking round 1/3…
+- Generating answer…
 
 ---
 
-## Make it even stronger
+## Make the AI smarter
 
-- Feed it more data (books, code, personal notes, chat history)
-- Run Continuous training for many hours
-- Teach important facts in the Learn tab
-- If you have a good GPU, increase numbers in `config.py`
+1. Go to **Learn** → upload large text files (books, notes, code, chat exports)
+2. Go to **Train** → press **Continuous Mode** and let it run
+3. Teach important facts manually
+4. Use **Research** mode when you need current information
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
 AI-From-Scratch/
-├── app.py              # Full mobile-first web app
-├── model.py            # Transformer (from scratch)
-├── train.py            # CLI training
-├── generate.py         # CLI chat
-├── config.py           # Model size & settings
+├── app.py           # Full web app with streaming & all features
+├── model.py         # Transformer built from scratch
+├── train.py         # CLI training
+├── generate.py      # CLI chat
+├── config.py        # Model size & hyperparameters
 ├── utils.py
 ├── data/
-│   ├── input.txt
-│   ├── manual_knowledge.json
-│   └── x_bot_config.json
 ├── checkpoints/
 └── requirements.txt
 ```
 
 ---
 
-## Honest limits
+## Requirements
 
-This is a real neural network you own and train.  
-It will not match frontier models in general knowledge or fluency across every language until you give it massive data and compute.  
-What it *will* do is learn the style and information you provide and improve the more you train it.
+- Python 3.9+
+- PyTorch
+- Gradio
+- requests
+
+Works on CPU and NVIDIA GPU.
 
 ---
 
-**Own your AI.**
+**Own your intelligence.**
