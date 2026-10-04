@@ -2,91 +2,104 @@
 
 A **real neural network language model** built entirely from scratch using pure Python + PyTorch.
 
-No external AI APIs. No Groq. No Gemini. No OpenAI.
-Just your own model that you train yourself.
+No external AI APIs. No Groq. No Gemini. No OpenAI.  
+Just your own model that **you** train and own.
 
-## What this is
+---
 
-- A tiny but fully working GPT-style Transformer
-- Written from the ground up (attention, MLP, residual connections, etc.)
-- Character-level language model (easy to understand and train)
-- Full training loop
-- **Continuous Training Mode**: keeps training forever until you stop it
-- Text generation / simple chat
-- Completely yours — you own the weights
+## Features
 
-## Requirements
+- Full GPT-style Transformer written from the ground up
+- **Web Interface** (Gradio) with chat, training controls, and data upload
+- **Continuous Training Mode** — keeps improving until you stop it
+- More powerful defaults (256 embd, 6 layers, 8 heads)
+- Top-k sampling for better generation quality
+- Gradient clipping + GELU activations
+- Automatic checkpointing
+- Works on CPU or GPU
 
-- Python 3.9+
-- PyTorch (CPU or GPU)
-- A text file to train on (books, code, your notes, chat logs...)
+---
 
 ## Quick Start
 
 ```bash
-# 1. Clone
 git clone https://github.com/someone405-ship-it/AI-From-Scratch.git
 cd AI-From-Scratch
-
-# 2. Install
 pip install -r requirements.txt
+```
 
-# 3. Put your training data in data/input.txt
-#    (any text file works — the bigger the better)
+### Option 1: Web Interface (Recommended)
 
-# 4. Train
+```bash
+python app.py
+```
+
+Then open **http://localhost:7860** in your browser.
+
+From the web UI you can:
+- Upload any `.txt` file as training data
+- Start normal or continuous training
+- Chat with your model live
+- Adjust temperature, top-k, and length
+
+### Option 2: Command Line
+
+```bash
+# Train
 python train.py
 
-# 5. Generate text / chat with your model
+# Continuous training (runs until Ctrl+C)
+python train.py --continuous
+
+# Chat in terminal
 python generate.py
 ```
 
-## Continuous Training Mode
+---
 
-```bash
-python train.py --continuous
-```
+## How to make it smarter
 
-This will keep training forever (or until you press Ctrl+C).
-It automatically saves checkpoints so you can stop and resume anytime.
+1. **More data** — Put large text files in `data/input.txt` (books, code, Wikipedia, your notes...)
+2. **Longer training** — Use Continuous mode and let it run for hours
+3. **Bigger model** — Edit `config.py` and increase `n_embd`, `n_layer`, `n_head`
+4. **GPU** — Training is much faster with an NVIDIA GPU
 
-You can also set how long each "thinking" / training burst lasts.
+---
 
 ## Project Structure
 
 ```
 AI-From-Scratch/
-├── model.py          # The Transformer neural network (from scratch)
-├── train.py          # Training loop + continuous mode
-├── generate.py       # Text generation / chat interface
-├── config.py         # Hyperparameters
-├── utils.py          # Helpers (tokenizer, data loading)
-├── requirements.txt
+├── app.py            # Web interface (Gradio)
+├── model.py          # Transformer neural network (from scratch)
+├── train.py          # CLI training + continuous mode
+├── generate.py       # CLI chat / generation
+├── config.py         # Model size & training settings
+├── utils.py          # Tokenizer & helpers
 ├── data/
-│   └── input.txt     # Put your training text here
-└── checkpoints/      # Model weights are saved here
+│   └── input.txt     # Your training text goes here
+├── checkpoints/     # Saved model weights
+└── requirements.txt
 ```
-
-## How it works (simple explanation)
-
-1. We split text into characters
-2. The model learns to predict the next character
-3. After enough training, it can generate new text that looks like the training data
-4. The more data + more training time you give it, the smarter it gets
-
-This is the same core idea behind GPT, Claude, Grok, etc. — just much smaller so you can run it on a normal computer.
-
-## Scaling up
-
-- More data → better model
-- Longer training → better model
-- Bigger model (increase `n_embd`, `n_layer`, `n_head` in config.py) → better model (needs more VRAM)
-- GPU makes training much faster
-
-## License
-
-MIT — do whatever you want with it.
 
 ---
 
-Built for you by Grok. Own your AI.
+## Model Architecture
+
+- Character-level tokenizer (simple & transparent)
+- Multi-head self-attention
+- Feed-forward layers with GELU
+- Residual connections + LayerNorm
+- Causal masking (can only look at past tokens)
+
+This is the same fundamental architecture used by GPT, Claude, Grok, etc. — just much smaller so you can train it yourself.
+
+---
+
+## License
+
+MIT — completely free to use, modify, and share.
+
+---
+
+**Own your AI.**

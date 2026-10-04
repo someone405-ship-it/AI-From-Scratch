@@ -1,3 +1,4 @@
 torch>=2.0.0
 numpy
 tqdm
+gradio>=4.0.0
