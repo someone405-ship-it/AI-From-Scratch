@@ -1,68 +1,70 @@
 # AI From Scratch
 
-A **real neural network language model** built entirely from scratch using pure Python + PyTorch.
+**Your own neural network** — trained by you, running on your device, with a beautiful mobile-first interface.
 
-No external AI APIs. No Groq. No Gemini. No OpenAI.  
-Just your own model that **you** train and own.
+No external LLM APIs for the core brain. Pure PyTorch Transformer built from the ground up.
 
 ---
 
 ## Features
 
-- Full GPT-style Transformer written from the ground up
-- **Web Interface** (Gradio) with chat, training controls, and data upload
-- **Continuous Training Mode** — keeps improving until you stop it
-- More powerful defaults (256 embd, 6 layers, 8 heads)
-- Top-k sampling for better generation quality
-- Gradient clipping + GELU activations
-- Automatic checkpointing
-- Works on CPU or GPU
+| Feature | Description |
+|---------|-------------|
+| **Mobile-first UI** | Excellent interface designed for phones |
+| **Chat** | Talk to the model you trained |
+| **Learn from device** | Upload files directly from your phone/computer |
+| **Manual teaching** | Teach specific facts that the AI remembers |
+| **Continuous training** | Keeps learning until you stop it |
+| **Stronger model** | 384-dim, 8 layers, 8 heads, 512 context |
+| **X Bot section** | Configure automatic posting 2–3 times per day |
+| **GitHub section** | Works with your connected GitHub |
+| **Top-k sampling** | Higher quality generation |
 
 ---
 
-## Quick Start
+## Quick Start (Mobile or Desktop)
 
 ```bash
 git clone https://github.com/someone405-ship-it/AI-From-Scratch.git
 cd AI-From-Scratch
 pip install -r requirements.txt
-```
-
-### Option 1: Web Interface (Recommended)
-
-```bash
 python app.py
 ```
 
-Then open **http://localhost:7860** in your browser.
+Then open **http://YOUR-IP:7860** on your phone (or localhost:7860 on computer).
 
-From the web UI you can:
-- Upload any `.txt` file as training data
-- Start normal or continuous training
-- Chat with your model live
-- Adjust temperature, top-k, and length
-
-### Option 2: Command Line
-
-```bash
-# Train
-python train.py
-
-# Continuous training (runs until Ctrl+C)
-python train.py --continuous
-
-# Chat in terminal
-python generate.py
-```
+You can also install it as a Progressive Web App on mobile for an app-like experience.
 
 ---
 
-## How to make it smarter
+## How to use
 
-1. **More data** — Put large text files in `data/input.txt` (books, code, Wikipedia, your notes...)
-2. **Longer training** — Use Continuous mode and let it run for hours
-3. **Bigger model** — Edit `config.py` and increase `n_embd`, `n_layer`, `n_head`
-4. **GPU** — Training is much faster with an NVIDIA GPU
+1. Go to **Learn** tab → upload text files from your device
+2. Go to **Train** tab → press **Continuous Mode**
+3. Let it train (the longer the better)
+4. Go to **Chat** and talk to your AI
+5. Optionally configure the **X Bot** and **GitHub** sections
+
+---
+
+## X Bot
+
+In the X Bot tab you can:
+- Set topics
+- Choose how many posts per day (1–5)
+- Enter your X API keys
+- Generate sample posts with your trained model
+
+Real automatic posting requires valid X API credentials (developer.x.com).
+
+---
+
+## Make it even stronger
+
+- Feed it more data (books, code, personal notes, chat history)
+- Run Continuous training for many hours
+- Teach important facts in the Learn tab
+- If you have a good GPU, increase numbers in `config.py`
 
 ---
 
@@ -70,35 +72,27 @@ python generate.py
 
 ```
 AI-From-Scratch/
-├── app.py            # Web interface (Gradio)
-├── model.py          # Transformer neural network (from scratch)
-├── train.py          # CLI training + continuous mode
-├── generate.py       # CLI chat / generation
-├── config.py         # Model size & training settings
-├── utils.py          # Tokenizer & helpers
+├── app.py              # Full mobile-first web app
+├── model.py            # Transformer (from scratch)
+├── train.py            # CLI training
+├── generate.py         # CLI chat
+├── config.py           # Model size & settings
+├── utils.py
 ├── data/
-│   └── input.txt     # Your training text goes here
-├── checkpoints/     # Saved model weights
+│   ├── input.txt
+│   ├── manual_knowledge.json
+│   └── x_bot_config.json
+├── checkpoints/
 └── requirements.txt
 ```
 
 ---
 
-## Model Architecture
+## Honest limits
 
-- Character-level tokenizer (simple & transparent)
-- Multi-head self-attention
-- Feed-forward layers with GELU
-- Residual connections + LayerNorm
-- Causal masking (can only look at past tokens)
-
-This is the same fundamental architecture used by GPT, Claude, Grok, etc. — just much smaller so you can train it yourself.
-
----
-
-## License
-
-MIT — completely free to use, modify, and share.
+This is a real neural network you own and train.  
+It will not match frontier models in general knowledge or fluency across every language until you give it massive data and compute.  
+What it *will* do is learn the style and information you provide and improve the more you train it.
 
 ---
 
