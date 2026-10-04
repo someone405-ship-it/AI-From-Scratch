@@ -1,67 +1,65 @@
+---
+title: AI From Scratch
+emoji: 🤖
+colorFrom: purple
+colorTo: indigo
+sdk: gradio
+sdk_version: 4.44.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # AI From Scratch
 
-Your own neural network — train it yourself, chat with it, and **install it on your phone** like a real app.
+Your own neural network that you can train and chat with.
+
+**Live thinking steps • Web search • Continuous training • Mobile friendly**
 
 ---
 
-## Install on your Phone (Recommended)
+## Public Link (Free)
 
-### Method 1 – Run on computer + Install on phone (easiest)
+You can deploy this project for free on Hugging Face Spaces and get a public link that works without running anything on your computer.
 
-1. On your computer run:
+### How to get your public link (takes ~3 minutes)
 
-```bash
-git clone https://github.com/someone405-ship-it/AI-From-Scratch.git
-cd AI-From-Scratch
-pip install -r requirements.txt
-python app.py
-```
-
-2. Make sure your phone and computer are on the **same Wi-Fi**.
-
-3. On your phone open the address shown (example):
+1. Go to [https://huggingface.co/spaces](https://huggingface.co/spaces)
+2. Click **"Create new Space"**
+3. Settings:
+   - Space name: `AI-From-Scratch` (or any name)
+   - SDK: **Gradio**
+   - Hardware: **CPU basic** (free)
+4. After the Space is created, go to the **Files** tab
+5. Upload all the files from this repository (or connect the GitHub repo)
+6. Wait 1–2 minutes for it to build
+7. Your public link will be:
    ```
-   http://192.168.1.XX:7860
+   https://huggingface.co/spaces/YOUR_USERNAME/AI-From-Scratch
    ```
 
-4. **Android**:
-   - Tap the menu (⋮) → **"Add to Home screen"** or **"Install app"**
-
-5. **iPhone**:
-   - Tap the Share button → **"Add to Home Screen"**
-
-Now you have an app icon on your phone!
-
----
-
-### Method 2 – Public website (optional)
-
-If you want a link that works from anywhere, you can deploy it for free. Tell me and I will help you put it online (Hugging Face Spaces / Railway / etc.).
+You can also click **"Add to Home Screen"** on your phone to use it like an app.
 
 ---
 
 ## Features
 
-- Live streaming thinking steps
+- Live streaming of thinking steps
 - 4 Thinking modes (Fast → Research)
 - Web search
-- Learn from files on your device
+- Learn from uploaded files
 - Manual teaching
-- Continuous training
+- Continuous training mode
 - X Bot section
-- GitHub aware
-- **Installable on phone (PWA)**
+- Mobile-friendly interface
 
 ---
 
-## Requirements
-
-- Python 3.9+
-- PyTorch
-- Gradio
-- requests
+## Run locally (optional)
 
 ```bash
+git clone https://github.com/someone405-ship-it/AI-From-Scratch.git
+cd AI-From-Scratch
 pip install -r requirements.txt
 python app.py
 ```
