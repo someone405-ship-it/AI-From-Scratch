@@ -1,25 +1,14 @@
 # AI From Scratch
 
-Your own neural network — trained by you, running on your device, with live thinking, web search, and a beautiful mobile interface.
+Your own neural network — train it yourself, chat with it, and **install it on your phone** like a real app.
 
 ---
 
-## Highlights
+## Install on your Phone (Recommended)
 
-- **Live streaming thinking steps** — watch the AI plan, search, recall facts, and generate in real time
-- **Four thinking modes**: Fast → Balanced → Strong → Research
-- **Web search** (no API key required)
-- **Conversation memory**
-- **Learn from device files** + manual teaching
-- **Continuous training** with auto checkpoints
-- **X Bot** configuration section
-- **GitHub** awareness
-- **Export chat**
-- **Mobile-first** excellent UI
+### Method 1 – Run on computer + Install on phone (easiest)
 
----
-
-## Quick Start
+1. On your computer run:
 
 ```bash
 git clone https://github.com/someone405-ship-it/AI-From-Scratch.git
@@ -28,52 +17,40 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Open **http://localhost:7860** (or your computer’s IP on your phone).
+2. Make sure your phone and computer are on the **same Wi-Fi**.
+
+3. On your phone open the address shown (example):
+   ```
+   http://192.168.1.XX:7860
+   ```
+
+4. **Android**:
+   - Tap the menu (⋮) → **"Add to Home screen"** or **"Install app"**
+
+5. **iPhone**:
+   - Tap the Share button → **"Add to Home Screen"**
+
+Now you have an app icon on your phone!
 
 ---
 
-## Thinking Modes
+### Method 2 – Public website (optional)
 
-| Mode | What it does |
-|------|--------------|
-| **Fast** | Quick local answer |
-| **Balanced** | Memory + light reasoning |
-| **Strong** | Live steps + knowledge + web search |
-| **Research** | Deepest reasoning, multiple rounds, best search |
-
-In Strong and Research modes you will see every step appear live:
-- Planning…
-- Recalling facts…
-- Connecting to GitHub…
-- Searching the web…
-- Deep thinking round 1/3…
-- Generating answer…
+If you want a link that works from anywhere, you can deploy it for free. Tell me and I will help you put it online (Hugging Face Spaces / Railway / etc.).
 
 ---
 
-## Make the AI smarter
+## Features
 
-1. Go to **Learn** → upload large text files (books, notes, code, chat exports)
-2. Go to **Train** → press **Continuous Mode** and let it run
-3. Teach important facts manually
-4. Use **Research** mode when you need current information
-
----
-
-## Project structure
-
-```
-AI-From-Scratch/
-├── app.py           # Full web app with streaming & all features
-├── model.py         # Transformer built from scratch
-├── train.py         # CLI training
-├── generate.py      # CLI chat
-├── config.py        # Model size & hyperparameters
-├── utils.py
-├── data/
-├── checkpoints/
-└── requirements.txt
-```
+- Live streaming thinking steps
+- 4 Thinking modes (Fast → Research)
+- Web search
+- Learn from files on your device
+- Manual teaching
+- Continuous training
+- X Bot section
+- GitHub aware
+- **Installable on phone (PWA)**
 
 ---
 
@@ -84,8 +61,11 @@ AI-From-Scratch/
 - Gradio
 - requests
 
-Works on CPU and NVIDIA GPU.
+```bash
+pip install -r requirements.txt
+python app.py
+```
 
 ---
 
-**Own your intelligence.**
+**Own your AI.**
