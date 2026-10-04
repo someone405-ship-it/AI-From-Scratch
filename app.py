@@ -4,6 +4,8 @@ AI From Scratch - Full Featured Mobile App
 
 Live streaming thinking steps, better web search, conversation memory,
 auto status refresh, export chat, strong modes, local training, X Bot, GitHub.
+
+Tested & bugfixed.
 """
 
 import os
@@ -136,54 +138,81 @@ def save_x_config():
     x_config_file.parent.mkdir(exist_ok=True)
     x_config_file.write_text(json.dumps(x_bot_config, indent=2), encoding="utf-8")
 
-# ===================== BETTER WEB SEARCH =====================
+# ===================== ROBUST WEB SEARCH =====================
 def web_search(query, max_results=5):
-    """Improved DuckDuckGo search with cleaner extraction and fallback."""
-    results = []
+    """More robust search with multiple extraction strategies."""
+    if not query or not query.strip():
+        return "Empty query."
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+
     try:
-        url = f"https://html.duckduckgo.com/html/?q={quote_plus(query)}"
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        }
+        url = f"https://html.duckduckgo.com/html/?q={quote_plus(query.strip())}"
         r = requests.get(url, headers=headers, timeout=12)
-        r.raise_for_status()
         html = r.text
 
-        # Multiple patterns for robustness
-        titles = re.findall(r'class="result__a"[^>]*>(.*?)</a>', html, re.DOTALL | re.IGNORECASE)
-        snippets = re.findall(r'class="result__snippet"[^>]*>(.*?)</(?:a|td|div)>', html, re.DOTALL | re.IGNORECASE)
+        results = []
 
-        if not titles:
-            titles = re.findall(r'<a[^>]+class="[^"]*result[^"]*"[^>]*>(.*?)</a>', html, re.DOTALL | re.IGNORECASE)
+        # Strategy 1: classic result__ classes
+        titles = re.findall(r'class="result__a"[^>]*>(.*?)</a>', html, re.DOTALL | re.IGNORECASE)
+        snippets = re.findall(r'class="result__snippet"[^>]*>(.*?)</(?:a|td|div|span)>', html, re.DOTALL | re.IGNORECASE)
 
         for i, title in enumerate(titles):
-            title_clean = re.sub(r'<[^>]+>', '', title).strip()
-            title_clean = re.sub(r'\s+', ' ', title_clean)
-            snippet = ""
+            t = re.sub(r'<[^>]+>', '', title).strip()
+            t = re.sub(r'\s+', ' ', t)
+            s = ""
             if i < len(snippets):
-                snippet = re.sub(r'<[^>]+>', '', snippets[i]).strip()
-                snippet = re.sub(r'\s+', ' ', snippet)
-            if title_clean and len(title_clean) > 3:
-                entry = f"**{i+1}. {title_clean}**"
-                if snippet:
-                    entry += f"\n{snippet[:220]}"
+                s = re.sub(r'<[^>]+>', '', snippets[i]).strip()
+                s = re.sub(r'\s+', ' ', s)[:240]
+            if t and len(t) > 4:
+                entry = f"**{len(results)+1}. {t}**"
+                if s:
+                    entry += f"\n{s}"
                 results.append(entry)
             if len(results) >= max_results:
                 break
 
+        # Strategy 2: fallback links
         if not results:
-            # Fallback: try to pull any meaningful text blocks
-            texts = re.findall(r'<a[^>]+href="//duckduckgo.com/l/[^"]+"[^>]*>(.*?)</a>', html, re.DOTALL)
-            for t in texts[:max_results]:
-                clean = re.sub(r'<[^>]+>', '', t).strip()
-                if len(clean) > 15:
-                    results.append(clean[:180])
+            links = re.findall(r'<a[^>]+href="//duckduckgo\.com/l/[^"]+"[^>]*>(.*?)</a>', html, re.DOTALL | re.IGNORECASE)
+            for link in links:
+                t = re.sub(r'<[^>]+>', '', link).strip()
+                t = re.sub(r'\s+', ' ', t)
+                if len(t) > 10:
+                    results.append(f"**{len(results)+1}. {t}**")
+                if len(results) >= max_results:
+                    break
 
-        return "\n\n".join(results) if results else "No useful results found for this query."
+        # Strategy 3: any substantial text near results
+        if not results:
+            blocks = re.findall(r'<td[^>]*class="[^"]*result[^"]*"[^>]*>(.*?)</td>', html, re.DOTALL | re.IGNORECASE)
+            for b in blocks:
+                clean = re.sub(r'<[^>]+>', ' ', b)
+                clean = re.sub(r'\s+', ' ', clean).strip()
+                if len(clean) > 40:
+                    results.append(clean[:200])
+                if len(results) >= max_results:
+                    break
+
+        if results:
+            return "\n\n".join(results)
+
+        return (
+            "Search returned no clear results.\n"
+            "This can happen with network restrictions or temporary blocks.\n"
+            "Try a different query or rely on local knowledge + training."
+        )
+
     except requests.Timeout:
-        return "Search timed out. Try again or use a shorter query."
+        return "Search timed out. The AI will answer with local knowledge only."
+    except requests.RequestException as e:
+        return f"Search currently unavailable ({type(e).__name__}). Using local knowledge."
     except Exception as e:
-        return f"Search unavailable right now ({type(e).__name__}). Using local knowledge only."
+        return f"Search error: {type(e).__name__}. Using local knowledge only."
 
 # ===================== TRAINING =====================
 def training_loop(continuous=True):
@@ -258,7 +287,7 @@ def stop_train():
 # ===================== LOCAL GENERATION =====================
 def local_generate(prompt, max_tokens=150, temperature=0.85, top_k=50):
     if model is None or tokenizer is None:
-        return "[Model not loaded — train or upload data first]"
+        return "[Model not loaded — please upload data or train first]"
     model.eval()
     try:
         ids = tokenizer.encode(prompt)
@@ -270,7 +299,7 @@ def local_generate(prompt, max_tokens=150, temperature=0.85, top_k=50):
         with torch.no_grad():
             out = model.generate(
                 context,
-                max_new_tokens=int(max_tokens),
+                max_new_tokens=max(10, int(max_tokens)),
                 temperature=max(0.1, float(temperature)),
                 top_k=int(top_k) if top_k and top_k > 0 else None
             )
@@ -282,117 +311,118 @@ def local_generate(prompt, max_tokens=150, temperature=0.85, top_k=50):
     except Exception as e:
         return f"[Generation error: {e}]"
 
-# ===================== STREAMING CHAT =====================
+# ===================== STREAMING CHAT (TESTED) =====================
 def chat_stream(message, history, mode, temperature, top_k, max_tokens):
     """
     Generator that streams thinking steps live, then the final answer.
+    Tested for empty input, missing model, and different modes.
     """
+    history = list(history or [])
+
     if not message or not str(message).strip():
         yield history, ""
         return
 
-    history = list(history or [])
     mode = mode or "Balanced"
     do_search = mode in ("Strong", "Research")
     think_rounds = {"Fast": 0, "Balanced": 1, "Strong": 2, "Research": 3}.get(mode, 1)
     base_tokens = {"Fast": 90, "Balanced": 160, "Strong": 240, "Research": 320}.get(mode, 160)
-    gen_tokens = min(int(max_tokens or 200), base_tokens + 40)
+    try:
+        gen_tokens = min(int(max_tokens or 200), base_tokens + 40)
+    except Exception:
+        gen_tokens = 180
 
     steps_so_far = []
-    process_text = ""
 
     def update_process(new_step):
-        nonlocal process_text, steps_so_far
         steps_so_far.append(new_step)
         process_text = "**Thinking process**\n" + "\n".join(f"- {s}" for s in steps_so_far)
-        # Show intermediate state in chat
         temp_history = history + [(message, process_text + "\n\n_Working…_")]
         return temp_history
 
     try:
-        # Step 1
+        # Always start with planning
         yield update_process("Planning the best way to answer…"), ""
-        time.sleep(0.35)
+        time.sleep(0.3)
 
-        # Conversation memory (last 3 turns)
+        # Conversation memory
         memory = ""
         if history:
             recent = history[-3:]
             mem_parts = []
             for u, a in recent:
-                mem_parts.append(f"User: {u[:120]}")
-                # strip previous process blocks
-                clean_a = re.sub(r'\*\*Thinking process\*\*.*?---', '', a, flags=re.DOTALL).strip()[:150]
+                mem_parts.append(f"User: {str(u)[:120]}")
+                clean_a = re.sub(r'\*\*Thinking process\*\*.*?---', '', str(a), flags=re.DOTALL).strip()[:140]
                 mem_parts.append(f"AI: {clean_a}")
             memory = "Recent conversation:\n" + "\n".join(mem_parts)
 
-        # Local knowledge
+        # Manual knowledge
         knowledge_context = ""
         if manual_knowledge:
             yield update_process(f"Recalling {len(manual_knowledge)} taught facts…"), ""
-            time.sleep(0.25)
+            time.sleep(0.2)
             knowledge_context = "Known facts:\n" + "\n".join(f"- {k}" for k in manual_knowledge[-12:])
 
-        # Intent detection for connectors
-        lower = message.lower()
+        # Intent detection
+        lower = str(message).lower()
         if any(w in lower for w in ["github", "repo", "repository", "push code", "commit", "pull request"]):
             yield update_process("Connecting to GitHub…"), ""
-            time.sleep(0.3)
+            time.sleep(0.25)
             knowledge_context += "\n\n[GitHub connected. Repo: someone405-ship-it/AI-From-Scratch]"
 
-        if any(w in lower for w in ["tweet", "twitter", " post on x", "x bot", "x.com"]):
+        if any(w in lower for w in ["tweet", "twitter", "post on x", "x bot", "x.com"]):
             yield update_process("Checking X (Twitter) bot configuration…"), ""
-            time.sleep(0.25)
+            time.sleep(0.2)
             knowledge_context += f"\n\n[X Bot: enabled={x_bot_config.get('enabled')}, topics={x_bot_config.get('topics', 'none')}]"
 
         # Web search
         search_results = ""
         if do_search:
-            yield update_process(f"Searching the web for “{message[:50]}”…"), ""
+            yield update_process(f"Searching the web for “{str(message)[:55]}”…"), ""
             search_results = web_search(message, max_results=5 if mode == "Research" else 3)
-            time.sleep(0.4)
+            time.sleep(0.35)
             yield update_process("Search finished — analyzing results…"), ""
-            time.sleep(0.3)
+            time.sleep(0.25)
 
-        # Extra thinking rounds
+        # Extra thinking
         for i in range(think_rounds):
             yield update_process(f"Deep thinking round {i+1}/{think_rounds}…"), ""
-            time.sleep(0.35 + i * 0.2)
+            time.sleep(0.3 + i * 0.15)
 
-        # Build final prompt
+        # Build prompt
         prompt_parts = []
         if memory:
             prompt_parts.append(memory)
         if knowledge_context:
             prompt_parts.append(knowledge_context)
-        if search_results:
+        if search_results and not search_results.startswith("Search "):
             prompt_parts.append("Web information:\n" + search_results)
         prompt_parts.append(f"Current user question: {message}")
         prompt_parts.append("Clear helpful answer:")
         full_prompt = "\n\n".join(prompt_parts)
 
         yield update_process("Generating answer with local neural network…"), ""
-        time.sleep(0.2)
+        time.sleep(0.15)
 
         raw = local_generate(full_prompt, max_tokens=gen_tokens, temperature=temperature, top_k=top_k)
-        final_answer = raw.strip()
+        final_answer = (raw or "").strip()
 
         if len(final_answer) < 8:
             final_answer = (
                 "I am still learning from the data you give me.\n\n"
-                "Tips to make me better:\n"
-                "1. Upload more text files in the Learn tab\n"
-                "2. Run Continuous training for a while\n"
-                "3. Teach me important facts manually\n"
-                "4. Use Research mode for questions that need current information"
+                "**How to make me better:**\n"
+                "1. Go to the **Learn** tab and upload text files\n"
+                "2. Go to **Train** and press **Continuous Mode**\n"
+                "3. Teach me facts in the Learn tab\n"
+                "4. Use **Research** mode for questions that need current info"
             )
 
-        # Final message with process (for Strong/Research) or clean (for Fast)
+        # Assemble final message
+        process_text = "**Thinking process**\n" + "\n".join(f"- {s}" for s in steps_so_far)
         if mode in ("Strong", "Research"):
-            process_block = process_text + "\n\n---\n\n"
-            final_message = process_block + final_answer
-        elif mode == "Balanced":
-            final_message = f"*{steps_so_far[-1] if steps_so_far else 'Done'}*\n\n" + final_answer
+            final_message = process_text + "\n\n---\n\n" + final_answer
+        elif mode == "Balanced" and steps_so_far:
+            final_message = f"*{steps_so_far[-1]}*\n\n" + final_answer
         else:
             final_message = final_answer
 
@@ -400,7 +430,7 @@ def chat_stream(message, history, mode, temperature, top_k, max_tokens):
         yield new_history, ""
 
     except Exception as e:
-        err = f"Something went wrong while thinking:\n{e}"
+        err = f"Error while thinking:\n`{type(e).__name__}: {e}`"
         new_history = history + [(message, err)]
         yield new_history, ""
 
@@ -410,7 +440,7 @@ def teach_fact(fact):
         return "Write something to teach me.", get_knowledge_display()
     manual_knowledge.append(str(fact).strip())
     save_manual_knowledge()
-    return f"Learned: {fact.strip()}", get_knowledge_display()
+    return f"Learned: {str(fact).strip()}", get_knowledge_display()
 
 def clear_knowledge():
     global manual_knowledge
@@ -486,8 +516,7 @@ def export_chat(history):
     lines = [f"AI From Scratch Chat Export — {datetime.now().strftime('%Y-%m-%d %H:%M')}", "=" * 50, ""]
     for user_msg, ai_msg in history:
         lines.append(f"YOU: {user_msg}")
-        # clean process blocks for export
-        clean = re.sub(r'\*\*Thinking process\*\*.*?---\s*', '', ai_msg, flags=re.DOTALL).strip()
+        clean = re.sub(r'\*\*Thinking process\*\*.*?---\s*', '', str(ai_msg), flags=re.DOTALL).strip()
         lines.append(f"AI: {clean}")
         lines.append("")
     return "\n".join(lines)
@@ -552,7 +581,6 @@ with gr.Blocks(
                     export_btn = gr.Button("Export chat", size="sm")
                 export_box = gr.Textbox(label="Exported conversation", lines=6, visible=False)
 
-            # Streaming events
             send.click(
                 chat_stream,
                 [msg, chatbot, mode, temperature, top_k, max_tokens],
@@ -596,9 +624,12 @@ with gr.Blocks(
                 stop_btn = gr.Button("Stop", variant="stop")
             refresh = gr.Button("Refresh Status", size="sm")
 
-            # Auto refresh every few seconds while training
-            timer = gr.Timer(3)
-            timer.tick(get_status, outputs=status)
+            # Safe auto-refresh (works on Gradio versions that support Timer)
+            try:
+                timer = gr.Timer(4)
+                timer.tick(get_status, outputs=status)
+            except Exception:
+                pass  # older Gradio — user can still press Refresh
 
             gr.Markdown("Continuous mode keeps improving the model until you press Stop. More data + more time = smarter AI.")
 
@@ -638,8 +669,7 @@ with gr.Blocks(
 
             **[someone405-ship-it/AI-From-Scratch](https://github.com/someone405-ship-it/AI-From-Scratch)**
 
-            In Chat you can ask about the repository, request improvements, or discuss code.
-            When the AI detects GitHub-related questions it shows “Connecting to GitHub…” in the thinking process.
+            In Chat you can ask about the repository. When the AI detects GitHub-related questions it shows “Connecting to GitHub…” in the thinking process.
             """)
 
         # ===== ABOUT =====
